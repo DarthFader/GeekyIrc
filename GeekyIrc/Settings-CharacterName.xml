@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ConfigValues>
+  <DebugLogging>False</DebugLogging>
+  <LogItAll>False</LogItAll>
+  <LogAllInPrivateMessages>False</LogAllInPrivateMessages>
+  <LogAllInPrivateMessagesNick>LogNick</LogAllInPrivateMessagesNick>
+  <IrcUsername>
+    <Entry>IrcUsername</Entry>
+  </IrcUsername>
+  <IrcPassword>IrcPassword</IrcPassword>
+  <IrcChannel>#IrcChannel</IrcChannel>
+  <IrcAddress>IrcAddress</IrcAddress>
+  <IrcPort>6667</IrcPort>
+  <IrcSendDelay>200</IrcSendDelay>
+  <UseIrcSendDelay>True</UseIrcSendDelay>
+  <ReconnectDelay>30</ReconnectDelay>
+  <AutoReconnect>True</AutoReconnect>
+  <LogParty>False</LogParty>
+  <LogWhispers>False</LogWhispers>
+  <LogGuild>False</LogGuild>
+  <LogOfficer>False</LogOfficer>
+  <LogRaid>False</LogRaid>
+  <LogBattleground>False</LogBattleground>
+  <LogSay>False</LogSay>
+  <LogOwn>False</LogOwn>
+  <LogLoot>True</LogLoot>
+  <LootFilter>3</LootFilter>
+  <ListenToSpecificNick>
+    <Entry>MyNick</Entry>
+  </ListenToSpecificNick>
+  <UseNickSecurity>False</UseNickSecurity>
+  <AllowProcessKill>False</AllowProcessKill>
+  <CommandPrefix>!</CommandPrefix>
+  <NotifyGuild>False</NotifyGuild>
+  <NotifySay>False</NotifySay>
+  <NotifyBg>False</NotifyBg>
+  <NotifyRaid>False</NotifyRaid>
+  <NotifyParty>False</NotifyParty>
+  <NotifyOfficer>False</NotifyOfficer>
+  <ChangeProfiles>False</ChangeProfiles>
+  <GrindProfile></GrindProfile>
+  <QuestProfile></QuestProfile>
+  <Gatherbuddy2Profile></Gatherbuddy2Profile>
+  <NotifyLevelUp>False</NotifyLevelUp>
+  <NotifyDeath>False</NotifyDeath>
+  <NotifyMobKilled>False</NotifyMobKilled>
+</ConfigValues>
