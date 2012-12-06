@@ -58,7 +58,7 @@
         {
             if (ConfigValues.Instance.LogInHbsLog)
                 Logging.Write(text);
-
+            
             SendIrc(text);
         }
 
@@ -100,7 +100,7 @@
         /// </summary>
         public override Version Version
         {
-            get { return new Version(3, 0, 1, 0); }
+            get { return new Version(3, 0, 2, 0); }
         }
 
         public override void Initialize()
@@ -175,20 +175,25 @@
 
         public override void Pulse()
         {
-            if (!_waitTimer.IsFinished)return;
+            if (!_waitTimer.IsFinished) return;
 
-            if (!_irc.IsConnected)
+            try
             {
-                try
-                {
+                if (!_irc.IsConnected)
                     _irc.Connect(ConfigValues.Instance.IrcAddress, ConfigValues.Instance.IrcPort);
-                    _irc.Login(ConfigValues.Instance.IrcUsername, ConfigValues.Instance.IrcUsername[0]);
-                    _irc.RfcJoin(ConfigValues.Instance.IrcChannel);
-                }
-                catch (Exception ex)
-                {
-                    Logging.WriteException(ex);
-                }
+
+                _irc.Login(ConfigValues.Instance.IrcUsername, ConfigValues.Instance.IrcUsername[0]);
+                _irc.RfcJoin(ConfigValues.Instance.IrcChannel);
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteException(ex);
+            }
+            finally
+            {
+                _listener = new Thread(Listen) {IsBackground = true};
+
+                _listener.Start();
             }
 
             _waitTimer.Reset();
@@ -217,7 +222,7 @@
         private void Player_OnLevelUp(BotEvents.Player.LevelUpEventArgs args)
         {
             if (!ConfigValues.Instance.NotifyLevelUp)return;
-            var msg = string.Format("I'm {0} now",args.NewLevel);
+            var msg = string.Format("I'm level {0} now",args.NewLevel);
             Write(msg);
         }
 
@@ -232,7 +237,6 @@
         {
             var msg = string.Format("Changed bot, From {0} to {1}",args.OldBot, args.NewBot);
             Write(msg);
-            
         }
 
         void BotEvents_OnBotStarted(EventArgs args)
@@ -242,9 +246,7 @@
 
         private void BotEvents_OnBotStopped(EventArgs args)
         {
-            var msg = "Bot Stopped!";
-
-            SendIrc(msg);
+            SendIrc("Bot Stopped!");
         }
 
         void Chat_Whisper(Chat.ChatWhisperEventArgs e)
@@ -263,31 +265,37 @@
 
             if (channel == "say" && ConfigValues.Instance.LogSay)
             {
+                if (ConfigValues.Instance.NotifySay) OurNameNotification(e.Args);
                 Write(msg);
             }
 
             if (channel == "guild" && ConfigValues.Instance.LogGuild)
             {
+                if (ConfigValues.Instance.NotifyGuild) OurNameNotification(e.Args);
                 Write(msg);
             }
 
             if (channel == "officer" && ConfigValues.Instance.LogOfficer)
             {
+                if (ConfigValues.Instance.NotifyOfficer) OurNameNotification(e.Args);
                 Write(msg);
             }
 
             if (channel == "raid" && ConfigValues.Instance.LogRaid)
             {
+                if (ConfigValues.Instance.NotifyRaid) OurNameNotification(e.Args);
                 Write(msg);
             }
 
             if (channel == "battleground" && ConfigValues.Instance.LogBattleground)
             {
+                if (ConfigValues.Instance.NotifyBg) OurNameNotification(e.Args);
                 Write(msg);
             }
 
             if (channel == "party" && ConfigValues.Instance.LogParty)
             {
+                if (ConfigValues.Instance.NotifyParty) OurNameNotification(e.Args);
                 Write(msg);
             }
            
