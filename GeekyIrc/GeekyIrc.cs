@@ -100,7 +100,7 @@
         /// </summary>
         public override Version Version
         {
-            get { return new Version(3, 0, 2, 0); }
+            get { return new Version(3, 0, 2, 1); }
         }
 
         public override void Initialize()
@@ -184,16 +184,14 @@
 
                 _irc.Login(ConfigValues.Instance.IrcUsername, ConfigValues.Instance.IrcUsername[0]);
                 _irc.RfcJoin(ConfigValues.Instance.IrcChannel);
+                
+                _listener = new Thread(Listen) {IsBackground = true};
+
+                _listener.Start();
             }
             catch (Exception ex)
             {
                 Logging.WriteException(ex);
-            }
-            finally
-            {
-                _listener = new Thread(Listen) {IsBackground = true};
-
-                _listener.Start();
             }
 
             _waitTimer.Reset();
@@ -205,9 +203,16 @@
 
         void Logging_OnLogMessage(System.Collections.ObjectModel.ReadOnlyCollection<Logging.LogMessage> messages)
         {
-            if (ConfigValues.Instance.LogItAll)
+            try
             {
-                SendIrc(string.Format("{0}",messages));
+                if (ConfigValues.Instance.LogItAll)
+                {
+                    SendIrc(string.Format("{0}", messages));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteException(ex);
             }
         }
 
@@ -216,7 +221,6 @@
             if (!ConfigValues.Instance.NotifyMobKilled)return;
             var msg = string.Format("I killed {0}",args.KilledMob);
             Write(msg);
-
         }
 
         private void Player_OnLevelUp(BotEvents.Player.LevelUpEventArgs args)
