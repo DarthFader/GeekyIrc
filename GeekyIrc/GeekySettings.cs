@@ -35,7 +35,6 @@ namespace GeekyIrc
 {
     using System;
     using System.ComponentModel;
-    using System.Drawing;
     using System.Drawing.Design;
     using System.IO;
     using System.Windows.Forms;
@@ -51,10 +50,6 @@ namespace GeekyIrc
         //////////////////////////////////////////////////////////////////////////
         //                          Credits to Highvoltz                        //
         //////////////////////////////////////////////////////////////////////////
-        internal ToolStripStatusLabel _lblAddress;
-        internal ToolStripStatusLabel _lblBlocking;
-        internal ToolStripStatusLabel _lblChannel;
-        private StatusStrip _strip;
         private IContainer components;
         private Button button1;
         private PropertyGrid pGrid;
@@ -64,12 +59,6 @@ namespace GeekyIrc
             InitializeComponent();
             Instance = this;
             pGrid.SelectedObject = ConfigValues.Instance;
-
-            _lblAddress.ForeColor = GeekyIrc.Irc.IsConnected ? Color.Green : Color.Red;
-            _lblChannel.ForeColor = GeekyIrc.Irc.IsJoined
-                                        (ConfigValues.Instance.IrcChannel, ConfigValues.Instance.IrcUsername[0])
-                                        ? Color.Green
-                                        : Color.Red;
 
             GridItem root = pGrid.SelectedGridItem;
             while (root.Parent != null)
@@ -106,12 +95,8 @@ namespace GeekyIrc
         private void InitializeComponent()
         {
             this.pGrid = new System.Windows.Forms.PropertyGrid();
-            this._strip = new System.Windows.Forms.StatusStrip();
-            this._lblAddress = new System.Windows.Forms.ToolStripStatusLabel();
-            this._lblChannel = new System.Windows.Forms.ToolStripStatusLabel();
-            this._lblBlocking = new System.Windows.Forms.ToolStripStatusLabel();
             this.button1 = new System.Windows.Forms.Button();
-            this._strip.SuspendLayout();
+
             this.SuspendLayout();
             // 
             // pGrid
@@ -124,38 +109,6 @@ namespace GeekyIrc
             this.pGrid.TabIndex = 0;
             this.pGrid.ToolbarVisible = false;
             this.pGrid.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
-            // 
-            // _strip
-            // 
-            this._strip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this._lblAddress,
-            this._lblChannel,
-            this._lblBlocking});
-            this._strip.Location = new System.Drawing.Point(0, 346);
-            this._strip.Name = "_strip";
-            this._strip.Size = new System.Drawing.Size(283, 22);
-            this._strip.TabIndex = 1;
-            this._strip.Text = "statusStrip1";
-            // 
-            // _lblAddress
-            // 
-            this._lblAddress.Name = "_lblAddress";
-            this._lblAddress.Size = new System.Drawing.Size(49, 17);
-            this._lblAddress.Text = "Address";
-            this._lblAddress.ToolTipText = "Click this button to connect.";
-            // 
-            // _lblChannel
-            // 
-            this._lblChannel.Name = "_lblChannel";
-            this._lblChannel.Size = new System.Drawing.Size(51, 17);
-            this._lblChannel.Text = "Channel";
-            this._lblChannel.ToolTipText = "Click this label to Disconnect from the server.";
-            // 
-            // _lblBlocking
-            // 
-            this._lblBlocking.Name = "_lblBlocking";
-            this._lblBlocking.Size = new System.Drawing.Size(28, 17);
-            this._lblBlocking.Text = "Run";
             // 
             // button1
             // 
@@ -173,14 +126,10 @@ namespace GeekyIrc
             this.ClientSize = new System.Drawing.Size(283, 368);
             this.Controls.Add(this.pGrid);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this._strip);
             this.MinimumSize = new System.Drawing.Size(250, 300);
             this.Name = "ConfigForm";
             this.Text = "Config";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ConfigForm_FormClosed);
-            this.Load += new System.EventHandler(this.ConfigForm_Load);
-            this._strip.ResumeLayout(false);
-            this._strip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -188,23 +137,12 @@ namespace GeekyIrc
 
         private void propertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            GeekyIrc.Write
-                (string.Format
-                     ("Settings changed : {0} to {1} (Old Value : {2})",
-                      e.ChangedItem.Label,
-                      e.ChangedItem.Value,
-                      e.OldValue));
             ConfigValues.Instance.Save();
         }
 
-        private void ConfigForm_Load(object sender, EventArgs e)
-        {
-            GeekyIrc.Write("Config Open.");
-        }
 
         private void ConfigForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            GeekyIrc.Write("Config Closed.");
             ConfigValues.Instance.Save();
         }
 

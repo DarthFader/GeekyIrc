@@ -90,16 +90,6 @@
     <Compile Include="SmartIrc4Net\IrcConnection\IrcProperties.cs" />
     <Compile Include="SmartIrc4Net\IrcConnection\IrcTcpClient.cs" />
     <Compile Include="SmartIrc4Net\Logger.cs" />
-    <Compile Include="Util\Bnet.cs" />
-    <Compile Include="Util\Format.cs" />
-    <Compile Include="Util\IrcEvents.cs" />
-    <Compile Include="Util\Log.cs" />
-    <Compile Include="Util\Lua.cs" />
-    <Compile Include="Util\Request.cs" />
-    <Compile Include="Util\Version.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Settings-CharacterName.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SmartIrc4Net\app.config" />
