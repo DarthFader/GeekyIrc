@@ -44,13 +44,20 @@
             set;
         }
 
-        private Styx.Common.Helpers.WaitTimer _waitTimer = Styx.Common.Helpers.WaitTimer.ThirtySeconds;
+        private readonly Styx.Common.Helpers.WaitTimer _waitTimer = Styx.Common.Helpers.WaitTimer.ThirtySeconds;
 
         private void Listen()
         {
-            while (_irc.IsConnected)
+            try
             {
-                _irc.Listen();
+                while (_irc.IsConnected)
+                {
+                    _irc.Listen();
+                }
+            }
+            catch(Exception ex)
+            {
+                Logging.WriteException(ex);
             }
         }
 
@@ -100,7 +107,7 @@
         /// </summary>
         public override Version Version
         {
-            get { return new Version(3, 0, 2, 1); }
+            get { return new Version(3, 0, 2, 2); }
         }
 
         public override void Initialize()
@@ -146,6 +153,10 @@
                 _irc.Connect(ConfigValues.Instance.IrcAddress, ConfigValues.Instance.IrcPort);
                 _irc.Login(ConfigValues.Instance.IrcUsername, ConfigValues.Instance.IrcUsername[0]);
                 _irc.RfcJoin(ConfigValues.Instance.IrcChannel);
+                
+                _listener = new Thread(Listen) {IsBackground = true};
+
+                _listener.Start();
             }
             catch (Exception ex)
             {
@@ -156,11 +167,9 @@
             }
             finally
             {
-                _listener = new Thread(Listen) {IsBackground = true};
+                
 
-                _listener.Start();
-
-                Logging.Write(string.Format("GeekyIrc version: {0} started.",Version));
+                Logging.Write("GeekyIrc version: {0} started.",Version);
             }
 
             Init = true;
@@ -207,7 +216,13 @@
             {
                 if (ConfigValues.Instance.LogItAll)
                 {
-                    SendIrc(string.Format("{0}", messages));
+                    messages.ToList().ForEach(t =>
+                    {
+                        if (t.Level == Styx.Helpers.GlobalSettings.Instance.LogLevel)
+                        {
+                            SendIrc(t.Message);
+                        }
+                    });
                 }
             }
             catch (Exception ex)
@@ -233,8 +248,7 @@
         private void Player_OnPlayerDied() 
         { 
             if (!ConfigValues.Instance.NotifyDeath)return;
-            var msg = "I died!";
-            Write(msg); 
+            Write("I died!"); 
         }
 
         private void BotEvents_OnBotChanged(BotEvents.BotChangedEventArgs args)
@@ -265,7 +279,7 @@
             var msg = string.Format("[{0}] {1} : {2}", e.EventName.Replace("CHAT_MSG_", ""), e.Author, e.Message);
             var channel = e.EventName.Replace("CHAT_MSG_", "").ToLower();
 
-            if (e.Author == Styx.StyxWoW.Me.Name && !ConfigValues.Instance.LogOwn) return;
+            if (e.Author == StyxWoW.Me.Name && !ConfigValues.Instance.LogOwn) return;
 
             if (channel == "say" && ConfigValues.Instance.LogSay)
             {
@@ -361,7 +375,7 @@
             }
             catch
             {
-                // Catch some wierd exceptions
+                // Catch some wierd lua exceptions
             }
         }
 
@@ -411,12 +425,12 @@
                             case "afk":
                                 Run
                                     (e.Data,
-                                     () => { Lua.DoString(string.Format("RunMacroText(\"/AFK\")")); });
+                                     () => Lua.DoString(string.Format("RunMacroText(\"/AFK\")")));
                                 break;
                             case "dnd":
                                 Run
                                     (e.Data,
-                                     () => { Lua.DoString(string.Format("RunMacroText(\"/DND\")")); });
+                                     () => Lua.DoString(string.Format("RunMacroText(\"/DND\")")));
                                 break;
                             case "testunstuck":
                                 Run
@@ -481,39 +495,39 @@
                                          TreeRoot.Start();
                                      });
                                 break;
-                            case "testcolor":
-                                var testcolor = new List<string>
-                                                {
-                                                    IrcColor.White + "White",
-                                                    IrcColor.Black + "Black",
-                                                    IrcColor.BlueNavy + "BlueNavy",
-                                                    IrcColor.Blue + "Blue",
-                                                    IrcColor.Red + "Red",
-                                                    IrcColor.Orange + "Orange",
-                                                    IrcColor.Yellow + "Yellow",
-                                                    IrcColor.Green + "Green",
-                                                    IrcColor.Teal + "Teal",
-                                                    IrcColor.Aqua + "Aqua",
-                                                    IrcColor.DarkBlue + "DarkBlue",
-                                                    IrcColor.Pink + "Pink",
-                                                    IrcColor.Grey + "Grey",
-                                                    IrcColor.Purple + "Purple",
-                                                    IrcColor.DarkGrey + "DarkGrey",
-                                                    IrcColor.LightGrey + "LightGrey",
-                                                    String.Format
-                                                        ("{0}R{1}a{2}i{3}n{4}b{5}o{6}w!",
-                                                         IrcColor.Red,
-                                                         IrcColor.Orange,
-                                                         IrcColor.Yellow,
-                                                         IrcColor.Green,
-                                                         IrcColor.Blue,
-                                                         IrcColor.Purple,
-                                                         IrcColor.Pink)
-                                                };
-                                RequestList
-                                    (e.Data,
-                                     testcolor);
-                                break;
+                            //case "testcolor":
+                            //    var testcolor = new List<string>
+                            //                    {
+                            //                        IrcColor.White + "White",
+                            //                        IrcColor.Black + "Black",
+                            //                        IrcColor.BlueNavy + "BlueNavy",
+                            //                        IrcColor.Blue + "Blue",
+                            //                        IrcColor.Red + "Red",
+                            //                        IrcColor.Orange + "Orange",
+                            //                        IrcColor.Yellow + "Yellow",
+                            //                        IrcColor.Green + "Green",
+                            //                        IrcColor.Teal + "Teal",
+                            //                        IrcColor.Aqua + "Aqua",
+                            //                        IrcColor.DarkBlue + "DarkBlue",
+                            //                        IrcColor.Pink + "Pink",
+                            //                        IrcColor.Grey + "Grey",
+                            //                        IrcColor.Purple + "Purple",
+                            //                        IrcColor.DarkGrey + "DarkGrey",
+                            //                        IrcColor.LightGrey + "LightGrey",
+                            //                        String.Format
+                            //                            ("{0}R{1}a{2}i{3}n{4}b{5}o{6}w!",
+                            //                             IrcColor.Red,
+                            //                             IrcColor.Orange,
+                            //                             IrcColor.Yellow,
+                            //                             IrcColor.Green,
+                            //                             IrcColor.Blue,
+                            //                             IrcColor.Purple,
+                            //                             IrcColor.Pink)
+                            //                    };
+                            //    RequestList
+                            //        (e.Data,
+                            //         testcolor);
+                            //    break;
 
                             case "wowkill":
                                 if (ConfigValues.Instance.AllowProcessKill)
@@ -1118,12 +1132,11 @@
         ///   Send IrcMessages, channel/privmsg depending on settings.
         /// </summary>
         /// <param name="message"> </param>
-        public void SendIrc(string message)
-        {
-            if (ConfigValues.Instance.LogAllInPrivateMessages)
-                _irc.SendMessage(SendType.Message, ConfigValues.Instance.LogAllInPrivateMessagesNick, message);
-            else
-                _irc.SendMessage(SendType.Message, ConfigValues.Instance.IrcChannel, message);
+        public void SendIrc(string message) {
+            _irc.SendMessage
+                (SendType.Message,
+                 ConfigValues.Instance.LogAllInPrivateMessages
+                     ? ConfigValues.Instance.LogAllInPrivateMessagesNick : ConfigValues.Instance.IrcChannel, message);
         }
 
 
@@ -1190,9 +1203,10 @@
         public void SendInventoryItemList(IrcMessageData data)
         {
             var itemList = new List<string>();
-            foreach (WoWItem bagItem in
-                StyxWoW.Me.BagItems.Where(bagItem => !itemList.Contains(bagItem.Name)))
-                itemList.Add(bagItem.Name);
+            foreach (WoWItem bagItem in StyxWoW.Me.BagItems)
+            {
+                if (!itemList.Contains(bagItem.Name)) itemList.Add(bagItem.Name);
+            }
 
             try
             {
@@ -1233,10 +1247,10 @@
         public void SendInventoryQualityItemList(IrcMessageData data, int quality)
         {
             var itemList = new List<string>();
-            foreach (WoWItem bagItem in
-                StyxWoW.Me.BagItems.Where
-                    (bagItem => !itemList.Contains(bagItem.Name) && GetItemQuality(bagItem.ItemInfo.Id) == quality))
-                itemList.Add(bagItem.Name);
+            foreach (WoWItem bagItem in StyxWoW.Me.BagItems)
+            {
+                if (!itemList.Contains(bagItem.Name) && GetItemQuality(bagItem.ItemInfo.Id) == quality) itemList.Add(bagItem.Name);
+            }
             try
             {
                 itemList.ForEach(t =>
@@ -1268,10 +1282,10 @@
         public void SendInventoryItemList(IrcMessageData data, string type)
         {
             var itemList = new List<string>();
-            foreach (WoWItem bagItem in
-                StyxWoW.Me.BagItems.Where
-                    (bagItem => !itemList.Contains(bagItem.Name) && bagItem.Name.ToLower().Contains(type.ToLower())))
-                itemList.Add(bagItem.Name);
+            foreach (WoWItem bagItem in StyxWoW.Me.BagItems)
+            {
+                if (!itemList.Contains(bagItem.Name) && bagItem.Name.ToLower().Contains(type.ToLower())) itemList.Add(bagItem.Name);
+            }
 
             _irc.SendReply
                 (data, String.Format("Yes master, here is a list with items containing {0}", UppercaseFirst(type)));
@@ -1666,8 +1680,7 @@
         {
             if (ConfigValues.Instance.UseUppercaseFormat)
                 return String.IsNullOrEmpty(s) ? String.Empty : Char.ToUpper(s[0]) + s.Substring(1);
-            else
-                return s;
+            return s;
         }
 
         public static string Ordinal(int number)
@@ -1701,36 +1714,36 @@
             return String.Format("{0}{1}", number, suffix);
         }
 
-        /// <summary>
-        ///   Return Class color, limited cause Irc doesn't have that many colors.
-        /// </summary>
-        /// <param name="wClass"> </param>
-        /// <param name="message"> </param>
-        /// <returns> </returns>
-        public static string ClassColor(WoWClass wClass, string message)
-        {
-            switch (wClass)
-            {
-                case WoWClass.Priest:
-                    return GColor(IrcColor.White, message);
-                case WoWClass.Rogue:
-                    return GColor(IrcColor.Yellow, message);
-                case WoWClass.DeathKnight:
-                    return GColor(IrcColor.Red, message);
-                case WoWClass.Paladin:
-                    return GColor(IrcColor.Pink, message);
-                case WoWClass.Warlock:
-                    return GColor(IrcColor.Purple, message);
-                case WoWClass.Shaman:
-                    return GColor(IrcColor.Blue, message);
-                case WoWClass.Mage:
-                    return GColor(IrcColor.Teal, message);
-                case WoWClass.Druid:
-                    return GColor(IrcColor.Orange, message);
-                default:
-                    return message;
-            }
-        }
+        ///// <summary>
+        /////   Return Class color, limited cause Irc doesn't have that many colors.
+        ///// </summary>
+        ///// <param name="wClass"> </param>
+        ///// <param name="message"> </param>
+        ///// <returns> </returns>
+        //public static string ClassColor(WoWClass wClass, string message)
+        //{
+        //    switch (wClass)
+        //    {
+        //        case WoWClass.Priest:
+        //            return GColor(IrcColor.White, message);
+        //        case WoWClass.Rogue:
+        //            return GColor(IrcColor.Yellow, message);
+        //        case WoWClass.DeathKnight:
+        //            return GColor(IrcColor.Red, message);
+        //        case WoWClass.Paladin:
+        //            return GColor(IrcColor.Pink, message);
+        //        case WoWClass.Warlock:
+        //            return GColor(IrcColor.Purple, message);
+        //        case WoWClass.Shaman:
+        //            return GColor(IrcColor.Blue, message);
+        //        case WoWClass.Mage:
+        //            return GColor(IrcColor.Teal, message);
+        //        case WoWClass.Druid:
+        //            return GColor(IrcColor.Orange, message);
+        //        default:
+        //            return message;
+        //    }
+        //}
 
         /// <summary>
         ///   Convert the first character in the string to uppercase.
@@ -1842,45 +1855,45 @@
             get { return ConfigValues.Instance.ColorIrcMessages ? ((char)3 + "15") : ""; }
         }
 
-        public static string GetColorSetting(string color)
-        {
-            switch (color)
-            {
-                case "White":
-                    return White;
-                case "Black":
-                    return Black;
-                case "BlueNavy":
-                    return BlueNavy;
-                case "Blue":
-                    return Blue;
-                case "Red":
-                    return Red;
-                case "Orange":
-                    return Orange;
-                case "Yellow":
-                    return Yellow;
-                case "Green":
-                    return Green;
-                case "Teal":
-                    return Teal;
-                case "Aqua":
-                    return Aqua;
-                case "DarkBlue":
-                    return DarkBlue;
-                case "Pink":
-                    return Pink;
-                case "Grey":
-                    return Grey;
-                case "Purple":
-                    return Purple;
-                case "DarkGrey":
-                    return DarkGrey;
-                case "LightGrey":
-                    return LightGrey;
-                default:
-                    return "";
-            }
-        }
+        //public static string GetColorSetting(string color)
+        //{
+        //    switch (color)
+        //    {
+        //        case "White":
+        //            return White;
+        //        case "Black":
+        //            return Black;
+        //        case "BlueNavy":
+        //            return BlueNavy;
+        //        case "Blue":
+        //            return Blue;
+        //        case "Red":
+        //            return Red;
+        //        case "Orange":
+        //            return Orange;
+        //        case "Yellow":
+        //            return Yellow;
+        //        case "Green":
+        //            return Green;
+        //        case "Teal":
+        //            return Teal;
+        //        case "Aqua":
+        //            return Aqua;
+        //        case "DarkBlue":
+        //            return DarkBlue;
+        //        case "Pink":
+        //            return Pink;
+        //        case "Grey":
+        //            return Grey;
+        //        case "Purple":
+        //            return Purple;
+        //        case "DarkGrey":
+        //            return DarkGrey;
+        //        case "LightGrey":
+        //            return LightGrey;
+        //        default:
+        //            return "";
+        //    }
+        //}
     }
 }

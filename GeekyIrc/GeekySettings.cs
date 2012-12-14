@@ -152,7 +152,7 @@ namespace GeekyIrc
             {
                 // TODO: Fix the path
                 string pth = Settings.SettingsDirectory;
-                using (OpenFileDialog ofd = new OpenFileDialog())
+                using (var ofd = new OpenFileDialog())
                 {
                     ofd.InitialDirectory = pth;
                     ofd.Filter =
